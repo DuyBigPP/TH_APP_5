@@ -3,6 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {MessageCircle, Users, Bell, Settings} from 'lucide-react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -16,13 +17,22 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 12);
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: {height: 62, paddingBottom: 8, paddingTop: 8},
+        tabBarStyle: {
+          paddingTop: 8,
+          paddingBottom: bottomPad,
+          height: 60 + bottomPad,
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#E2E8F0',
+        },
         tabBarLabelStyle: {fontSize: 12, fontWeight: '600'},
       }}>
       <Tab.Screen

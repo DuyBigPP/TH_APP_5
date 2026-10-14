@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import {ArrowLeft, Send} from 'lucide-react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {conversations} from '../data/mockData';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
@@ -20,6 +21,7 @@ interface Props {
 }
 
 const ChatScreen: React.FC<Props> = ({route, navigation}) => {
+  const insets = useSafeAreaInsets();
   const {conversationId} = route.params ?? {};
   const conversation = conversations.find(c => c.id === conversationId) ?? conversations[0];
 
@@ -59,7 +61,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={0}>
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: insets.top + 12}]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ArrowLeft size={22} color="#fff" />
         </TouchableOpacity>
@@ -80,7 +82,7 @@ const ChatScreen: React.FC<Props> = ({route, navigation}) => {
         showsVerticalScrollIndicator={false}
       />
 
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, {paddingBottom: insets.bottom + 12}]}>
         <TextInput
           style={styles.input}
           placeholder="Nhập tin nhắn..."

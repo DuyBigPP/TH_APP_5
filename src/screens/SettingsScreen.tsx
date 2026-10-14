@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Switch, Alert} from 'react-native';
 import {LogOut, Bell, Volume2, ChevronRight} from 'lucide-react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {currentUser} from '../data/mockData';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const SettingsScreen: React.FC<Props> = ({navigation}) => {
+  const insets = useSafeAreaInsets();
   const [pushEnabled, setPushEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
@@ -21,7 +23,7 @@ const SettingsScreen: React.FC<Props> = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {paddingTop: insets.top + 12}]}>
       <Text style={styles.headerTitle}>Cài đặt</Text>
 
       <View style={styles.profileCard}>

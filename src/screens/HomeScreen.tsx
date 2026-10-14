@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import {Search} from 'lucide-react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {conversations, Conversation} from '../data/mockData';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 const HomeScreen: React.FC<Props> = ({navigation}) => {
+  const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState('');
 
   const filtered = conversations.filter(c =>
@@ -54,7 +56,7 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: insets.top + 12}]}>
         <Text style={styles.headerTitle}>Đoạn chat</Text>
         <Text style={styles.headerCount}>{filtered.length} cuộc trò chuyện</Text>
       </View>

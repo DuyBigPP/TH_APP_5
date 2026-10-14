@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, FlatList, StyleSheet} from 'react-native';
 import {Bell} from 'lucide-react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {appNotifications, AppNotification} from '../data/mockData';
 import {colors} from '../theme/colors';
 
 const NotificationsScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [data, setData] = useState<AppNotification[]>(appNotifications);
 
   const markAsRead = (id: string) => {
@@ -40,7 +42,7 @@ const NotificationsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, {paddingTop: insets.top + 12}]}>
         <View>
           <Text style={styles.headerTitle}>Thông báo</Text>
           <Text style={styles.headerCount}>
