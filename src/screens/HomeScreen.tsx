@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {Search} from 'lucide-react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {conversations, Conversation} from '../data/mockData';
+import {subscribeUserChats, ChatSummary, formatTime} from '../services/chatService';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
 
@@ -20,33 +20,36 @@ interface Props {
 const HomeScreen: React.FC<Props> = ({navigation}) => {
   const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState('');
+  const [conversations, setConversations] = useState<ChatSummary[]>([]);
+
+  useEffect(() => subscribeUserChats(setConversations), []);
 
   const filtered = conversations.filter(c =>
-    c.user.name.toLowerCase().includes(searchText.toLowerCase()),
+    (c.name ?? '').toLowerCase().includes(searchText.toLowerCase()),
   );
 
-  const renderItem = ({item, index}: {item: Conversation; index: number}) => (
+  const renderItem = ({item}: {item: ChatSummary}) => (
     <TouchableOpacity
       style={styles.item}
       activeOpacity={0.7}
-      onPress={() => navigation.navigate('Chat', {conversationId: item.id})}>
-      <Avatar name={item.user.name} index={Number(item.user.id)} size={52} />
+      onPress={() => navigation.navigate('Chat', {otherId: item.otherId, name: item.name})}>
+      <Avatar name={item.name} size={52} />
       <View style={styles.info}>
         <View style={styles.topRow}>
           <Text style={styles.name} numberOfLines={1}>
-            {item.user.name}
+            {item.name}
           </Text>
-          <Text style={styles.time}>{item.time}</Text>
+          <Text style={styles.time}>{formatTime(item.lastTime)}</Text>
         </View>
         <View style={styles.bottomRow}>
           <Text
-            style={[styles.lastMessage, item.unreadCount > 0 && styles.unreadMessage]}
+            style={[styles.lastMessage, item.unread > 0 && styles.unreadMessage]}
             numberOfLines={1}>
             {item.lastMessage}
           </Text>
-          {item.unreadCount > 0 && (
+          {item.unread > 0 && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item.unreadCount}</Text>
+              <Text style={styles.badgeText}>{item.unread}</Text>
             </View>
           )}
         </View>
@@ -75,7 +78,10 @@ const HomeScreen: React.FC<Props> = ({navigation}) => {
       <FlatList
         data={filtered}
         renderItem={renderItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.otherId}
+        ListEmptyComponent={
+          <Text style={styles.empty}>Chưa có cuộc trò chuyện. Vào Danh bạ để bắt đầu.</Text>
+        }
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
       />
@@ -179,6 +185,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 6,
     marginLeft: 8,
+  },
+  empty: {
+    textAlign: 'center',
+    color: colors.textMuted,
+    marginTop: 40,
   },
   badgeText: {
     color: '#fff',

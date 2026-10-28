@@ -8,8 +8,12 @@ interface AvatarProps {
   size?: number;
 }
 
-const Avatar: React.FC<AvatarProps> = ({name, index = 0, size = 52}) => {
-  const bgColor = avatarColors[index % avatarColors.length];
+// không truyền index -> màu tính theo tên, cùng một người luôn cùng màu
+const hashName = (name: string) =>
+  [...name].reduce((h, c) => (h * 17 + c.charCodeAt(0)) | 0, 0) >>> 0;
+
+const Avatar: React.FC<AvatarProps> = ({name, index, size = 52}) => {
+  const bgColor = avatarColors[(index ?? hashName(name)) % avatarColors.length];
   return (
     <View
       style={[

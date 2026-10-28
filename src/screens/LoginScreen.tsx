@@ -9,27 +9,36 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import {MessageCircle, User, Lock} from 'lucide-react-native';
+import {MessageCircle, Mail, Lock} from 'lucide-react-native';
 import {colors} from '../theme/colors';
+import {login, friendlyAuthError} from '../services/authService';
 
 interface Props {
   navigation: any;
 }
 
 const LoginScreen: React.FC<Props> = ({navigation}) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (!username.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tài khoản');
+  const handleLogin = async () => {
+    if (!email.trim()) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng nhập email');
       return;
     }
-    if (!password.trim()) {
+    if (!password) {
       Alert.alert('Thiếu thông tin', 'Vui lòng nhập mật khẩu');
       return;
     }
-    navigation.replace('Main');
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+    } catch (e: any) {
+      Alert.alert('Đăng nhập thất bại', friendlyAuthError(e.code));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,14 +55,15 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
 
       <View style={styles.form}>
         <View style={styles.inputWrap}>
-          <User size={18} color={colors.textMuted} />
+          <Mail size={18} color={colors.textMuted} />
           <TextInput
             style={styles.input}
-            placeholder="Tài khoản"
+            placeholder="Email"
             placeholderTextColor={colors.textMuted}
-            value={username}
-            onChangeText={setUsername}
+            value={email}
+            onChangeText={setEmail}
             autoCapitalize="none"
+            keyboardType="email-address"
           />
         </View>
 
@@ -69,11 +79,19 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.85}>
-          <Text style={styles.buttonText}>Đăng nhập</Text>
+        <TouchableOpacity
+          style={[styles.button, loading && {opacity: 0.6}]}
+          onPress={handleLogin}
+          disabled={loading}
+          activeOpacity={0.85}>
+          <Text style={styles.buttonText}>{loading ? 'Đang đăng nhập...' : 'Đăng nhập'}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.hint}>Nhập bất kỳ tài khoản nào để trải nghiệm</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+          <Text style={styles.hint}>
+            Chưa có tài khoản? <Text style={styles.link}>Đăng ký</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
@@ -151,8 +169,12 @@ const styles = StyleSheet.create({
   hint: {
     textAlign: 'center',
     color: colors.textMuted,
-    fontSize: 13,
+    fontSize: 14,
     marginTop: 18,
+  },
+  link: {
+    color: colors.primary,
+    fontWeight: '700',
   },
 });
 

@@ -1,0 +1,11 @@
+{
+  "projectId": "chatapp-bai5-29422",
+  "appId": "1:829601106916:web:58e691e411e8402f3915f1",
+  "databaseURL": "https://chatapp-bai5-29422-default-rtdb.asia-southeast1.firebasedatabase.app",
+  "storageBucket": "chatapp-bai5-29422.firebasestorage.app",
+  "apiKey": "AIzaSyAIF9jOICdCoJE0VHlhNtGgYXuJhlTNNOc",
+  "authDomain": "chatapp-bai5-29422.firebaseapp.com",
+  "messagingSenderId": "829601106916",
+  "projectNumber": "829601106916",
+  "version": "2"
+}

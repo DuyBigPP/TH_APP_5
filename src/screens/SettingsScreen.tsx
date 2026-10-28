@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Switch, Alert} from 'react-native';
 import {LogOut, Bell, Volume2, ChevronRight} from 'lucide-react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {currentUser} from '../data/mockData';
+import {auth} from '../services/firebase';
+import {logout} from '../services/authService';
+import {subscribeUser, AppUser} from '../services/chatService';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
 
@@ -10,15 +12,19 @@ interface Props {
   navigation: any;
 }
 
-const SettingsScreen: React.FC<Props> = ({navigation}) => {
+const SettingsScreen: React.FC<Props> = () => {
   const insets = useSafeAreaInsets();
   const [pushEnabled, setPushEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [me, setMe] = useState<AppUser | null>(null);
+
+  useEffect(() => subscribeUser(auth.currentUser!.uid, setMe), []);
+  const myName = me?.name ?? auth.currentUser?.displayName ?? '';
 
   const handleLogout = () => {
     Alert.alert('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', [
       {text: 'Hủy', style: 'cancel'},
-      {text: 'Đăng xuất', style: 'destructive', onPress: () => navigation.replace('Login')},
+      {text: 'Đăng xuất', style: 'destructive', onPress: () => logout()},
     ]);
   };
 
@@ -27,10 +33,10 @@ const SettingsScreen: React.FC<Props> = ({navigation}) => {
       <Text style={styles.headerTitle}>Cài đặt</Text>
 
       <View style={styles.profileCard}>
-        <Avatar name={currentUser.name} index={0} size={64} />
+        <Avatar name={myName || '?'} size={64} />
         <View style={styles.profileInfo}>
-          <Text style={styles.name}>{currentUser.name}</Text>
-          <Text style={styles.email}>minh.tran@example.com</Text>
+          <Text style={styles.name}>{myName}</Text>
+          <Text style={styles.email}>{auth.currentUser?.email}</Text>
           <View style={styles.statusRow}>
             <View style={styles.onlineDot} />
             <Text style={styles.statusText}>Đang hoạt động</Text>

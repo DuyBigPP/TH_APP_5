@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {User} from 'firebase/auth';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -6,12 +7,14 @@ import {MessageCircle, Users, Bell, Settings} from 'lucide-react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ChatScreen from '../screens/ChatScreen';
 import {colors} from '../theme/colors';
+import {subscribeAuth, setupPresence} from '../services/authService';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -72,12 +75,40 @@ function MainTabs() {
 }
 
 export default function AppNavigator() {
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(
+    () =>
+      subscribeAuth(u => {
+        setUser(u);
+        setReady(true);
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    if (!user) return;
+    return setupPresence(user.uid);
+  }, [user]);
+
+  if (!ready) return null;
+
+  // Đăng nhập/đăng xuất đổi user -> stack tự đổi, không cần navigate thủ công
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}} />
-        <Stack.Screen name="Main" component={MainTabs} options={{headerShown: false}} />
-        <Stack.Screen name="Chat" component={ChatScreen} options={{headerShown: false}} />
+      <Stack.Navigator screenOptions={{headerShown: false}}>
+        {user ? (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Chat" component={ChatScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

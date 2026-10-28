@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {Search} from 'lucide-react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {users, User} from '../data/mockData';
+import {subscribeUsers, AppUser} from '../services/chatService';
 import {colors} from '../theme/colors';
 import Avatar from '../components/Avatar';
 
@@ -20,34 +20,36 @@ interface Props {
 const ContactsScreen: React.FC<Props> = ({navigation}) => {
   const insets = useSafeAreaInsets();
   const [searchText, setSearchText] = useState('');
+  const [users, setUsers] = useState<AppUser[]>([]);
+
+  useEffect(() => subscribeUsers(setUsers), []);
 
   const filtered = users.filter(u =>
     u.name.toLowerCase().includes(searchText.toLowerCase()),
   );
 
-  const openChat = (user: User) => {
-    const id = user.id <= '5' ? user.id : '1';
-    navigation.navigate('Chat', {conversationId: id});
+  const openChat = (user: AppUser) => {
+    navigation.navigate('Chat', {otherId: user.id, name: user.name});
   };
 
-  const renderItem = ({item}: {item: User}) => (
+  const renderItem = ({item}: {item: AppUser}) => (
     <TouchableOpacity
       style={styles.item}
       activeOpacity={0.7}
       onPress={() => openChat(item)}>
       <View>
-        <Avatar name={item.name} index={Number(item.id)} size={50} />
+        <Avatar name={item.name} size={50} />
         <View
           style={[
             styles.onlineDot,
-            {backgroundColor: item.isOnline ? colors.success : colors.textMuted},
+            {backgroundColor: item.online ? colors.success : colors.textMuted},
           ]}
         />
       </View>
       <View style={styles.info}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={{fontSize: 13, color: item.isOnline ? colors.success : colors.textMuted}}>
-          {item.isOnline ? 'Đang hoạt động' : 'Không hoạt động'}
+        <Text style={{fontSize: 13, color: item.online ? colors.success : colors.textMuted}}>
+          {item.online ? 'Đang hoạt động' : 'Không hoạt động'}
         </Text>
       </View>
       <View style={styles.chatButton}>
